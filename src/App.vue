@@ -1,9 +1,21 @@
 <script setup>
-import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useToast } from "@/composables/useToast";
+const { message, show } = useToast();
+import { ref, onMounted } from "vue";
 
 const router = useRouter();
 const users = ref([]);
+
+const currentUser = ref(null);
+
+onMounted(() => {
+  currentUser.value = JSON.parse(localStorage.getItem("currentUser"));
+
+  window.addEventListener("user-changed", () => {
+    currentUser.value = JSON.parse(localStorage.getItem("currentUser"));
+  });
+});
 
 function addUser(user) {
   // 1️⃣ Récupérer les utilisateurs existants
@@ -28,6 +40,7 @@ function addUser(user) {
 
 const handleLogout = () => {
   localStorage.removeItem("currentUser");
+  currentUser.value = null;
   router.push("/login");
 };
 </script>
@@ -42,12 +55,14 @@ const handleLogout = () => {
         </div>
 
         <div class="nav-links">
-          <router-link to="/" class="nav-item">Calendar</router-link>
-          <router-link to="/login" class="nav-item">Login</router-link>
-          <router-link to="/register" class="nav-item">Register</router-link>
-          <button @click="handleLogout" class="logout-btn">
-            Logout
-          </button>
+          <div v-if="!currentUser">
+            <router-link to="/login" class="nav-item">Login</router-link>
+            <router-link to="/register" class="nav-item">Register</router-link>
+          </div>
+          <div v-else>
+            <router-link to="/" class="nav-item">Calendar</router-link>
+            <button @click="handleLogout" class="logout-btn">Logout</button>
+          </div>
         </div>
       </div>
     </nav>
@@ -55,11 +70,16 @@ const handleLogout = () => {
     <main class="main-content">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
-          <div :key="$route.path"> <component :is="Component" :addUser="addUser" />
+          <div :key="$route.path">
+            <component :is="Component" :addUser="addUser" />
           </div>
         </transition>
       </router-view>
     </main>
+  </div>
+
+  <div v-if="show" class="toast">
+    {{ message }}
   </div>
 </template>
 
@@ -73,7 +93,10 @@ const handleLogout = () => {
 .app-layout {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    sans-serif;
 }
 
 /* 2. Navbar Style */
@@ -102,7 +125,9 @@ const handleLogout = () => {
   align-items: center;
   gap: 10px;
 }
-.logo-icon { font-size: 1.5rem; }
+.logo-icon {
+  font-size: 1.5rem;
+}
 .logo-text {
   font-weight: 800;
   font-size: 1.25rem;
@@ -127,7 +152,8 @@ const handleLogout = () => {
   border-radius: 8px;
 }
 
-.nav-item:hover, .router-link-active {
+.nav-item:hover,
+.router-link-active {
   color: #4f46e5;
   background: rgba(79, 70, 229, 0.1);
 }
@@ -157,11 +183,76 @@ const handleLogout = () => {
 }
 
 /* 7. Animations de transition */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+.fade-enter-active,
+.fade-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
+}
+/* 8. Style des liens Login/Register (Groupement) */
+/* Ajout d'un flex sur la div parente des liens conditionnels pour garder l'alignement */
+.nav-links > div {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* 9. Système de Toast */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 1rem 2rem;
+  background: #1f2937; /* Gris très foncé/anthracite */
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+  font-weight: 500;
+
+  /* Animation d'apparition */
+  animation: slideIn 0.3s ease-out forwards;
+
+  /* Support pour différents types si besoin (Optionnel) */
+  border-left: 4px solid #4f46e5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 10. Animation du Toast */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%) translateY(0);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 11. Responsive (Optionnel mais recommandé) */
+@media (max-width: 640px) {
+  .navbar {
+    padding: 0.75rem 1rem;
+  }
+
+  .logo-text {
+    display: none; /* Cache le texte sur mobile pour gagner de la place */
+  }
+
+  .toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    text-align: center;
+    justify-content: center;
+  }
 }
 </style>

@@ -1,6 +1,24 @@
 <script setup>
 import { useEvents } from '@/composables/useEvents';
 import EventCard from './EventCard.vue';
+import { ref } from "vue";
+import { useToast } from "@/composables/useToast";
+const { triggerToast } = useToast();
+
+const showConfirm = ref(false);
+const eventToDelete = ref(null);
+
+const confirmDelete = (id) => {
+  eventToDelete.value = id;
+  showConfirm.value = true;
+};
+
+const handleDelete = () => {
+  deleteEvent(eventToDelete.value);
+  showConfirm.value = false;
+  triggerToast("Événement supprimé avec succès !");
+};
+
 
 const props = defineProps({
   dayName: {
@@ -27,7 +45,7 @@ const onEdit = (event) => {
           v-for="event in dayEvents" 
           :key="event.id" 
           :event="event"
-          @delete="deleteEvent"
+          @delete="confirmDelete"
           @edit="onEdit"
           @click.stop />
       </TransitionGroup>
@@ -38,6 +56,15 @@ const onEdit = (event) => {
       </div>
     </div>
   </div>
+
+  <div v-if="showConfirm" class="confirm-overlay">
+  <div class="confirm-box">
+    <p>Confirmer la suppression ?</p>
+    <button @click="handleDelete">Oui</button>
+    <button @click="showConfirm = false">Annuler</button>
+  </div>
+</div>
+
 </template>
 
 <style scoped>
@@ -124,5 +151,98 @@ const onEdit = (event) => {
     min-height: auto;
     padding: 20px 10px;
   }
+}
+/* 1. Amélioration de l'état vide (Empty State) */
+.empty-state span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.plus-icon {
+  /* On améliore l'existant */
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.day-column:hover .plus-icon {
+  border-color: #4f46e5;
+  color: #4f46e5;
+  transform: scale(1.1);
+  border-style: solid;
+}
+
+/* 2. Overlay de confirmation (Arrière-plan flouté) */
+.confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.4); /* Backdrop sombre léger */
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  animation: fadeIn 0.2s ease;
+}
+
+/* 3. Boîte de dialogue (Confirm Box) */
+.confirm-box {
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+}
+
+.confirm-box p {
+  color: #1e293b;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+/* 4. Boutons de la modale */
+.confirm-box button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  margin: 0 5px;
+}
+
+/* Bouton Oui (Danger) */
+.confirm-box button:first-of-type {
+  background-color: #ef4444;
+  color: white;
+}
+
+.confirm-box button:first-of-type:hover {
+  background-color: #dc2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* Bouton Annuler */
+.confirm-box button:last-of-type {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.confirm-box button:last-of-type:hover {
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+/* Animation d'entrée */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 </style>

@@ -3,6 +3,9 @@ import { ref } from "vue";
 import { useEvents } from "@/composables/useEvents";
 import CalendarGrid from "../components/Calendar/CalendarGrid.vue";
 import EventModal from "@/components/Calendar/EventModal.vue";
+import { useToast } from "@/composables/useToast";
+const { triggerToast } = useToast();
+
 
 const { addEvent, updateEvent } = useEvents();
 
@@ -25,8 +28,10 @@ const openEditModal = (event) => {
 const handleConfirm = (eventData) => {
   if (editingEvent.value) {
     updateEvent(eventData);
+    triggerToast("Événement modifié avec succès !");
   } else {
     addEvent(eventData);
+    triggerToast("Événement ajouté avec succès !");
   }
   isModalOpen.value = false;
   editingEvent.value = null;

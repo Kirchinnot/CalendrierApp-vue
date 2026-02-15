@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import bcrypt from "bcryptjs";
 
 const props = defineProps({
-  addUser: Function
+  addUser: Function,
 });
 
 const email = ref("");
@@ -32,6 +32,7 @@ function login() {
   }
 
   localStorage.setItem("currentUser", JSON.stringify(user));
+  window.dispatchEvent(new Event("user-changed"));
   router.push("/");
 }
 </script>
@@ -50,7 +51,12 @@ function login() {
           <label>Email</label>
           <div class="input-wrapper">
             <span class="field-icon">✉️</span>
-            <input type="email" v-model="email" placeholder="votre@email.com" required />
+            <input
+              type="email"
+              v-model="email"
+              placeholder="votre@email.com"
+              required
+            />
           </div>
         </div>
 
@@ -58,14 +64,14 @@ function login() {
           <label>Mot de passe</label>
           <div class="input-wrapper">
             <span class="field-icon">🔒</span>
-            <input 
-              :type="showPassword ? 'text' : 'password'" 
-              v-model="password" 
-              placeholder="••••••••" 
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              v-model="password"
+              placeholder="••••••••"
               required
             />
             <span class="eye-toggle" @click="showPassword = !showPassword">
-              {{ showPassword ? '🙈' : '👁️' }}
+              {{ showPassword ? "🙈" : "👁️" }}
             </span>
           </div>
         </div>
@@ -81,7 +87,10 @@ function login() {
       </form>
 
       <div class="auth-footer">
-        <p>Pas encore de compte ? <router-link to="/register">Créer un compte</router-link></p>
+        <p>
+          Pas encore de compte ?
+          <router-link to="/register">Créer un compte</router-link>
+        </p>
       </div>
     </div>
   </div>
@@ -111,8 +120,14 @@ function login() {
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .auth-header {

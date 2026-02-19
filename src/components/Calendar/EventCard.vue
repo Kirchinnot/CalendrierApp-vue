@@ -6,19 +6,31 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["edit", "delete"]);
+const emit = defineEmits(["edit", "delete", "dragstart", "dragend"]);
+
+function onDragStart(e) {
+  e.dataTransfer.effectAllowed = "move";
+  emit("dragstart", props.event);
+}
+
+function onDragEnd() {
+  emit("dragend", props.event);
+}
 </script>
 
 <template>
   <div
     class="event-card"
+    draggable="true"
+    @dragstart="onDragStart"
+    @dragend="onDragEnd"
     :style="{
       backgroundColor: event.color + '20', // Ajoute de la transparence à la couleur de fond
       borderLeftColor: event.color,
     }"
   >
     <div class="event-content">
-      <span class="event-title">{{ event.title }}</span>
+      <span class="event-title">{{ event.title.substring(0, 10) }}</span>
     </div>
 
     <div class="event-actions">

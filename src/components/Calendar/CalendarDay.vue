@@ -1,6 +1,6 @@
 <script setup>
-import { useEvents } from '@/composables/useEvents';
-import EventCard from './EventCard.vue';
+import { useEvents } from "@/composables/useEvents";
+import EventCard from "./EventCard.vue";
 import { ref } from "vue";
 import { useToast } from "@/composables/useToast";
 const { triggerToast } = useToast();
@@ -19,37 +19,53 @@ const handleDelete = () => {
   triggerToast("Événement supprimé avec succès !");
 };
 
-
 const props = defineProps({
   dayName: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
-const emit = defineEmits(['day-click', 'edit-event']);
+const emit = defineEmits(["day-click", "edit-event"]);
 const { getEventsByDay, deleteEvent } = useEvents();
 const dayEvents = getEventsByDay(props.dayName);
 
 const onEdit = (event) => {
-  emit('edit-event', event);
+  emit("edit-event", event);
+};
+
+const draggedEvent = ref(null);
+
+function handleDragStart(event) {
+  draggedEvent.value = event;
+}
+
+function onDrop(dayName) {
+  if (!draggedEvent.value) return;
+  const oldDay = draggedEvent.value.date;
+  draggedEvent.value.date = dayName;
+  removeEventFromDay(oldDay, draggedEvent.value.id);
+  addEventToDay(dayName, draggedEvent.value);
+  draggedEvent.value = null;
 }
 </script>
 
 <template>
-  <div class="day-column" @click="emit('day-click', dayName)">
+  <div class="day-column" @click="emit('day-click', dayName)" @dragover.prevent @drop="onDrop(dayName)">
     <div class="day-overlay"></div>
     <div class="events-container">
       <TransitionGroup name="list">
-        <EventCard 
-          v-for="event in dayEvents" 
-          :key="event.id" 
+        <EventCard
+          v-for="event in dayEvents"
+          :key="event.id"
           :event="event"
           @delete="confirmDelete"
           @edit="onEdit"
-          @click.stop />
+          @click.stop
+          @dragstart="handleDragStart"
+        />
       </TransitionGroup>
-      
+
       <div v-if="!dayEvents || dayEvents.length === 0" class="empty-state">
         <div class="plus-icon">+</div>
         <span>Libre</span>
@@ -58,13 +74,12 @@ const onEdit = (event) => {
   </div>
 
   <div v-if="showConfirm" class="confirm-overlay">
-  <div class="confirm-box">
-    <p>Confirmer la suppression ?</p>
-    <button @click="handleDelete">Oui</button>
-    <button @click="showConfirm = false">Annuler</button>
+    <div class="confirm-box">
+      <p>Confirmer la suppression ?</p>
+      <button @click="handleDelete">Oui</button>
+      <button @click="showConfirm = false">Annuler</button>
+    </div>
   </div>
-</div>
-
 </template>
 
 <style scoped>
@@ -194,7 +209,9 @@ const onEdit = (event) => {
   background: white;
   padding: 1.5rem 2rem;
   border-radius: 16px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   max-width: 320px;
   width: 90%;
   text-align: center;
@@ -242,7 +259,11 @@ const onEdit = (event) => {
 
 /* Animation d'entrée */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 </style>

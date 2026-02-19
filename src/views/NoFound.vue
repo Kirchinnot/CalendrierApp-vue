@@ -18,12 +18,12 @@ const router = useRouter();
 
       <div class="actions">
         <button @click="router.push('/')" class="btn-primary">
-          <span class="icon">🏠</span> Retour à l'accueil
+          <span class="icon">🏠</span> Retour
         </button>
 
-        <button @click="router.push('/login')" class="btn-secondary">
+        <!-- <button @click="router.push('/login')" class="btn-secondary">
           <span class="icon">🔑</span> Se connecter
-        </button>
+        </button> -->
       </div>
     </div>
   </div>

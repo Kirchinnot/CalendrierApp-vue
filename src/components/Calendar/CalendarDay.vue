@@ -88,7 +88,6 @@ function onDrop(dayName) {
           :event="event"
           @delete="confirmDelete"
           @edit="onEdit"
-          @click.stop
           @dragstart="handleDragStart"
         />
       </TransitionGroup>
@@ -101,31 +100,44 @@ function onDrop(dayName) {
   </div>
 
   <Teleport to="body">
-  <Transition name="fade">
-    <div v-if="showConfirm || showClearConfirm" class="confirm-overlay" @click="showConfirm = false; showClearConfirm = false">
-      
-      <div v-if="showConfirm" class="confirm-box" @click.stop>
-        <div class="warning-icon">🗑️</div>
-        <p>Confirmer la suppression ?</p>
-        <div class="confirm-actions">
-          <button @click="handleDelete" class="btn-danger">Supprimer</button>
-          <button @click="showConfirm = false" class="btn-cancel">Annuler</button>
+    <Transition name="fade">
+      <div
+        v-if="showConfirm || showClearConfirm"
+        class="confirm-overlay"
+        @click="
+          showConfirm = false;
+          showClearConfirm = false;
+        "
+      >
+        <div v-if="showConfirm" class="confirm-box" @click.stop>
+          <div class="warning-icon">🗑️</div>
+          <p>Confirmer la suppression ?</p>
+          <div class="confirm-actions">
+            <button @click="handleDelete" class="btn-danger">Supprimer</button>
+            <button @click="showConfirm = false" class="btn-cancel">
+              Annuler
+            </button>
+          </div>
+        </div>
+
+        <div v-if="showClearConfirm" class="confirm-box" @click.stop>
+          <div class="warning-icon">⚠️</div>
+          <h3>Vider la journée ?</h3>
+          <p>
+            Supprimer toutes les tâches du <strong>{{ dayName }}</strong> ?
+          </p>
+          <div class="confirm-actions">
+            <button @click="handleClearAll" class="btn-danger">
+              Tout supprimer
+            </button>
+            <button @click="showClearConfirm = false" class="btn-cancel">
+              Annuler
+            </button>
+          </div>
         </div>
       </div>
-
-      <div v-if="showClearConfirm" class="confirm-box" @click.stop>
-        <div class="warning-icon">⚠️</div>
-        <h3>Vider la journée ?</h3>
-        <p>Supprimer toutes les tâches du <strong>{{ dayName }}</strong> ?</p>
-        <div class="confirm-actions">
-          <button @click="handleClearAll" class="btn-danger">Tout supprimer</button>
-          <button @click="showClearConfirm = false" class="btn-cancel">Annuler</button>
-        </div>
-      </div>
-
-    </div>
-  </Transition>
-</Teleport>
+    </Transition>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -200,8 +212,10 @@ function onDrop(dayName) {
 /* --- Modales --- */
 .confirm-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
@@ -307,12 +321,27 @@ function onDrop(dayName) {
 }
 
 /* --- Animations --- */
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
-.list-enter-active, .list-leave-active { transition: all 0.4s ease; }
-.list-enter-from { opacity: 0; transform: scale(0.9) translateY(10px); }
-.list-leave-to { opacity: 0; transform: translateX(30px); }
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.4s ease;
+}
+.list-enter-from {
+  opacity: 0;
+  transform: scale(0.9) translateY(10px);
+}
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
 
 @media (max-width: 768px) {
   .day-column {

@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 const props = defineProps({
   event: {
     type: Object,
@@ -7,6 +8,9 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["edit", "delete", "dragstart", "dragend"]);
+
+// État pour afficher le détail
+const showDetail = ref(false);
 
 function onDragStart(e) {
   e.dataTransfer.effectAllowed = "move";
@@ -24,13 +28,14 @@ function onDragEnd() {
     draggable="true"
     @dragstart="onDragStart"
     @dragend="onDragEnd"
+    @click.stop="showDetail = true"
     :style="{
       backgroundColor: event.color + '20', // Ajoute de la transparence à la couleur de fond
       borderLeftColor: event.color,
     }"
   >
     <div class="event-content">
-      <span class="event-title">{{ event.title.substring(0, 10) }}</span>
+      <span class="event-title">{{ event.title.substring(0, 10) }}{{ event.title.length > 10 ? '...' : '' }}</span>
     </div>
 
     <div class="event-actions">
@@ -79,6 +84,22 @@ function onDragEnd() {
         </svg>
       </button>
     </div>
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="showDetail" class="detail-overlay" @click="showDetail = false">
+          <div class="detail-card" @click.stop :style="{ borderTop: '6px solid ' + event.color }">
+            <div class="detail-header">
+              <span class="category-tag" :style="{ backgroundColor: event.color + '20', color: event.color }">Tâche</span>
+              <button class="close-btn" @click="showDetail = false">&times;</button>
+            </div>
+            <p class="full-title">{{ event.title }}</p>
+            <div class="detail-footer">
+              <button class="btn-primary" @click="showDetail = false">Fermer</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -165,4 +186,77 @@ function onDragEnd() {
   color: #ef4444;
   border-color: #ef4444;
 }
+
+/* Styles du Popup de détail */
+.detail-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.detail-card {
+  background: white;
+  width: 90%;
+  max-width: 400px;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.category-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.full-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.4;
+  margin-bottom: 24px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 12px;
+  color: #475569;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #e2e8f0;
+}
+
+/* Animations */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

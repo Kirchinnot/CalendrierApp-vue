@@ -50,9 +50,12 @@ defineEmits(['day-click', 'edit-event']);
 }
 
 .calendar-header {
+  position: sticky;
+  top: 0;
+  z-index: 10; /* Reste au-dessus des cartes d'événements */
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background-color: #f8fafc; /* Gris très léger */
+  background-color: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -80,10 +83,41 @@ defineEmits(['day-click', 'edit-event']);
 .calendar-body {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  min-height: 600px; /* Un peu plus d'espace vertical */
-  background-image: 
-    linear-gradient(to right, #f1f5f9 1px, transparent 1px);
+  
+  /* 1. On fixe une hauteur maximum pour activer le scroll */
+  height: 550px; 
+  overflow-y: auto; /* Scroll vertical uniquement */
+  overflow-x: hidden; /* Empêche le scroll horizontal parasite */
+  
+  background-image: linear-gradient(to right, #f1f5f9 1px, transparent 1px);
   background-size: calc(100% / 7) 100%;
+  
+  /* Smooth scrolling pour une sensation plus fluide */
+  scroll-behavior: smooth;
+}
+
+/* 2. Stylisation de la barre de défilement (Scrollbar) pour Chrome/Safari/Edge */
+.calendar-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.calendar-body::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+.calendar-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* Gris discret */
+  border-radius: 10px;
+}
+
+.calendar-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* Plus sombre au survol */
+}
+
+/* Pour Firefox */
+.calendar-body {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
 }
 
 /* Responsive : Adaptation tablette et mobile */
